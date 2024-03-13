@@ -5,7 +5,9 @@ import simplestorage from "../contracts/simple_storage.json";
 import { v4 as uuidv4 } from "uuid";
 
 const PORT = 4001;
-const HOST = "http://localhost:5000";
+// this puts all the stuff we want onto a single firefly supernode
+const HOST = "http://localhost:5001"; 
+// it was set to 5000 (ip of first node), so that's why we only saw certain events (ex: txns) there. 
 const NAMESPACE = "default";
 const app = express();
 const firefly = new FireFly({
