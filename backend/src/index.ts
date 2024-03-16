@@ -1,62 +1,60 @@
 import FireFly, { FireFlySubscriptionBase } from "@hyperledger/firefly-sdk";
 import express from "express";
-import bodyparser from "body-parser";
+import bodyparser, { json } from "body-parser";
 import simplestorage from "../contracts/simple_storage.json";
 import { v4 as uuidv4 } from "uuid";
 
-// TODOS: 
+// TODOS:
 
-// 1) experiment with uploading report data to a single peer, ex: hospital A. 
-// 2) experiment with broadcasting data from that peer to others + seeing what gets recorded on the chain.
-// 3) experiment with querying broadcasted data (how can we actually get at the original malpractice incident?)
-// 4) experiment with deploying a smart contract for managing doctor registration. How can we: 
-  // a) trigger the contract to run on doctor registration submission, ex: emit DoctorRegistrationSubmitted(doctor_name, doctor_uid, location)
-  // b) feed the contract the doctor's practice history (can be binary indicator, or a threshold determined by frequency of occurrences or something)
-  //  on the chain? Is this easy?
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// 1) experiment with uploading report data to a single peer, ex: hospital A. DONE
+// 2) experiment with broadcasting data from that peer to others + seeing what gets recorded on the chain. DONE
+// 3) experiment with querying broadcasted data (how can we actually get at the original malpractice incident?) ALMOST DONE
+// 4) experiment with deploying a smart contract for managing doctor registration. How can we:
+// a) trigger the contract to run on doctor registration submission, ex: emit DoctorRegistrationSubmitted(doctor_name, doctor_uid, location)
+// b) feed the contract the doctor's practice history (can be binary indicator, or a threshold determined by frequency of occurrences or something)
+//  on the chain? Is this easy?
 
 const PORT = 4001;
 // this puts all the stuff we want onto a single firefly supernode
-const HOST = "http://localhost:5001"; 
-// it was set to 5000 (ip of first node), so that's why we only saw certain events (ex: txns) there. 
+const HOSTS = [
+  "http://localhost:5000",
+  "http://localhost:5001",
+  "http://localhost:5002",
+];
+// it was set to 5000 (ip of first node), so that's why we only saw certain events (ex: txns) there.
 const NAMESPACE = "default";
 const app = express();
-const firefly = new FireFly({
-  host: HOST,
-  namespace: NAMESPACE,
-});
+const fireflies = HOSTS.map(
+  (host) => new FireFly({ host: host, namespace: NAMESPACE }),
+);
 
 let apiName: string;
-
 app.use(bodyparser.json());
 
 app.get("/api/value", async (req, res) => {
-  res.send(await firefly.queryContractAPI(apiName, "get", {}));
+  // query for a list of data
+  // Not ideal, we want to be able to filter this down further based on plaintext tag or something
+  const resp = await fireflies[0].getMessages()
+  const broadcasts = resp.filter((item) => item.header.type === "broadcast")
+  res.send(broadcasts)
 });
 
 app.post("/api/value", async (req, res) => {
   try {
-    const fireflyRes = await firefly.invokeContractAPI(apiName, "set", {
-      input: {
-        x: req.body.x,
-      },
+    // upload the data to ex: node 1
+    const fireflyRes = await fireflies[0].uploadData({
+      value: JSON.stringify(req.body.x),
     });
+
+    // broadcast to peers
+    fireflies[0].sendBroadcast({
+      data: [
+        {
+          id: fireflyRes.id,
+        },
+      ],
+    });
+
     res.status(202).send({
       id: fireflyRes.id,
     });
@@ -68,18 +66,18 @@ app.post("/api/value", async (req, res) => {
 });
 
 async function init() {
-  const deployRes = await firefly.deployContract(
+  const deployRes = await fireflies[0].deployContract(
     {
       definition:
         simplestorage.contracts["simple_storage.sol:SimpleStorage"].abi,
       contract: simplestorage.contracts["simple_storage.sol:SimpleStorage"].bin,
       input: ["0"],
     },
-    { confirm: true }
+    { confirm: true },
   );
   const contractAddress = deployRes.output.contractLocation.address;
 
-  const generatedFFI = await firefly.generateContractInterface({
+  const generatedFFI = await fireflies[0].generateContractInterface({
     name: uuidv4(),
     namespace: NAMESPACE,
     version: "1.0",
@@ -89,12 +87,12 @@ async function init() {
     },
   });
 
-  const contractInterface = await firefly.createContractInterface(
+  const contractInterface = await fireflies[0].createContractInterface(
     generatedFFI,
-    { confirm: true }
+    { confirm: true },
   );
 
-  const contractAPI = await firefly.createContractAPI(
+  const contractAPI = await fireflies[0].createContractAPI(
     {
       interface: {
         id: contractInterface.id,
@@ -104,29 +102,32 @@ async function init() {
       },
       name: uuidv4(),
     },
-    { confirm: true }
+    { confirm: true },
   );
 
   apiName = contractAPI.name;
 
-  const listener = await firefly.createContractAPIListener(apiName, "Changed", {
+  const listener = await fireflies[0].createContractAPIListener(apiName, "Changed", {
     topic: "changed",
   });
 
-  firefly.listen(
-    {
-      filter: {
-        events: "blockchain_event_received",
+  // Listen for blockchain events on all nodes, logging out events as they happen
+  fireflies.map((firefly) =>
+    firefly.listen(
+      {
+        filter: {
+          events: "blockchain_event_received",
+        },
       },
-    },
-    async (socket, event) => {
-      console.log(event.blockchainEvent?.output);
-    }
+      async (socket, event) => {
+        console.log(event.blockchainEvent?.output);
+      },
+    ),
   );
 
   // Start listening
   app.listen(PORT, () =>
-    console.log(`Kaleido DApp backend listening on port ${PORT}!`)
+    console.log(`Kaleido DApp backend listening on port ${PORT}!`),
   );
 }
 

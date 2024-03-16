@@ -33,11 +33,14 @@ function App() {
     setErrorMsg(null);
     try {
       const res = await fetch(`/api/value`);
-      const { x, error } = await res.json();
+      // unpacking is tricky. the below line had me confused for a minute. 
+      // accessing nonexistent property on an object is just undefined; it doesn't throw an error
+      const resJSON = await res.json();
+      console.log(resJSON)
       if (!res.ok) {
-        setErrorMsg(error);
+        setErrorMsg(resJSON.error);
       } else {
-        setValue(x);
+        setValue(JSON.stringify(resJSON));
       }
     } catch (err: any) {
       setErrorMsg(err.stack);
@@ -82,7 +85,7 @@ function App() {
 
         {/* Query malpractice incident history */}
         <p>
-          <input className="incident-history" onChange={handleChange} />
+          <input className="incident-history" />
           <button
             type="button"
             className="App-button"
@@ -104,7 +107,7 @@ function App() {
 
         {/* Doctor registration (for medical board licensure in new state) */}
         <p>
-          <input className="doctor-registration" onChange={handleChange} />
+          <input className="doctor-registration"/>
           <button
             type="button"
             className="App-button"
