@@ -49,17 +49,62 @@ function App() {
     setDesiredValue(event.currentTarget.value);
   }
 
+
+
+  // TODO: 
+  // 1) create separate change handlers for each input field
+  // 2) create separate set/get api invocations for each "section": Incident report, patient query, doctor registration
+  // 3) beautify the input + output for each section (least important). Focus on functionality.
   return (
     <div className="App">
       <header className="App-header">
-        <img
-          src={"/kaleido_logo.svg"}
-          className="App-logo"
-          alt="logo"
-          aria-busy={loading}
-        />
+        {/* Report an Incident */}
         <p>
-          <input className="App-input" onChange={handleChange} />
+          <input className="incident-input" onChange={handleChange} />
+          <button
+            type="button"
+            className="App-button"
+            onClick={setContractValue}
+          >
+            Set Value
+          </button>
+        </p>
+        <p>
+          <button
+            type="button"
+            className="App-button"
+            onClick={getContractValue}
+          >
+            Get Value
+          </button>
+          {value !== "" ? <p>Retrieved value: {value}</p> : <p>&nbsp;</p>}
+        </p>
+
+        {/* Query malpractice incident history */}
+        <p>
+          <input className="incident-history" onChange={handleChange} />
+          <button
+            type="button"
+            className="App-button"
+            onClick={setContractValue}
+          >
+            Set Value
+          </button>
+        </p>
+        <p>
+          <button
+            type="button"
+            className="App-button"
+            onClick={getContractValue}
+          >
+            Get Value
+          </button>
+          {value !== "" ? <p>Retrieved value: {value}</p> : <p>&nbsp;</p>}
+        </p>
+
+        {/* Doctor registration (for medical board licensure in new state) */}
+        <p>
+          <input className="doctor-registration" onChange={handleChange} />
           <button
             type="button"
             className="App-button"

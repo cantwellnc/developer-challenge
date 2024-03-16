@@ -4,6 +4,33 @@ import bodyparser from "body-parser";
 import simplestorage from "../contracts/simple_storage.json";
 import { v4 as uuidv4 } from "uuid";
 
+// TODOS: 
+
+// 1) experiment with uploading report data to a single peer, ex: hospital A. 
+// 2) experiment with broadcasting data from that peer to others + seeing what gets recorded on the chain.
+// 3) experiment with querying broadcasted data (how can we actually get at the original malpractice incident?)
+// 4) experiment with deploying a smart contract for managing doctor registration. How can we: 
+  // a) trigger the contract to run on doctor registration submission, ex: emit DoctorRegistrationSubmitted(doctor_name, doctor_uid, location)
+  // b) feed the contract the doctor's practice history (can be binary indicator, or a threshold determined by frequency of occurrences or something)
+  //  on the chain? Is this easy?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const PORT = 4001;
 // this puts all the stuff we want onto a single firefly supernode
 const HOST = "http://localhost:5001"; 
