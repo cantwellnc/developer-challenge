@@ -115,7 +115,7 @@ async function init() {
   // Deploy registration contract to all nodes
   fireflies.map(async (firefly) => {
 
-    const deployRes = await fireflies[0].deployContract(
+    const deployRes = await firefly.deployContract(
       {
         definition:
           doctorregistration.contracts[
