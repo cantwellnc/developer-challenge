@@ -57,41 +57,21 @@ function App() {
   }
 
 
-  async function setContractValue() {
+  async function invokeContract() {
     setLoading(true);
     setErrorMsg(null);
     try {
-      const res = await fetch(`/api/value`, {
+      const res = await fetch(`/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          x: desiredValue,
-        }),
+        body: JSON.stringify({}),
       });
-      const { error } = await res.json();
-      if (!res.ok) {
-        setErrorMsg(error);
-      }
-    } catch (err: any) {
-      setErrorMsg(err.stack);
-    }
-    setLoading(false);
-  }
-
-  async function getContractValue() {
-    setLoading(true);
-    setErrorMsg(null);
-    try {
-      // Add query params, pointing to value rn but this will change.
-      const res = await fetch(`/api/value?` + new URLSearchParams({
-        doctor: 'andre',
-      }));
-      const resJSON = await res.json();
-      console.log(resJSON)
+      const resJSON = await res.json()
       if (!res.ok) {
         setErrorMsg(resJSON.error);
-      } else {
-        setValue(JSON.stringify(resJSON));
+      }
+      else {
+        console.log(`RESPONSE: ${resJSON}`)
       }
     } catch (err: any) {
       setErrorMsg(err.stack);
@@ -152,10 +132,11 @@ function App() {
           <button
             type="button"
             className="App-button"
-            onClick={setContractValue}
+            onClick={invokeContract}
           >
             Set Value
           </button>
+          
         </p>
 
         {/* Error message display */}
