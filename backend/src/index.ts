@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 
 // 1) experiment with uploading report data to a single peer, ex: hospital A. DONE
 // 2) experiment with broadcasting data from that peer to others + seeing what gets recorded on the chain. DONE
-// 3) experiment with querying broadcasted data (how can we actually get at the original malpractice incident?) ALMOST DONE
+// 3) experiment with querying broadcasted data (how can we actually get at the original malpractice incident?) DONE
 // 4) experiment with deploying a smart contract for managing doctor registration. How can we:
 // a) trigger the contract to run on doctor registration submission, ex: emit DoctorRegistrationSubmitted(doctor_name, doctor_uid, location)
 // b) feed the contract the doctor's practice history (can be binary indicator, or a threshold determined by frequency of occurrences or something)

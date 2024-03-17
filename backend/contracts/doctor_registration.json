@@ -1,0 +1,234 @@
+{
+    "contracts": {
+      "simple_storage.sol:SimpleStorage": {
+        "abi": [
+            [
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "components": [
+                                {
+                                    "internalType": "string",
+                                    "name": "doctorName",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "stateOfRegistration",
+                                    "type": "string"
+                                }
+                            ],
+                            "indexed": false,
+                            "internalType": "struct DoctorRegistration.Registration",
+                            "name": "x",
+                            "type": "tuple"
+                        }
+                    ],
+                    "name": "DoctorRegistrationAccepted",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "components": [
+                                {
+                                    "internalType": "string",
+                                    "name": "doctorName",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "stateOfRegistration",
+                                    "type": "string"
+                                }
+                            ],
+                            "indexed": false,
+                            "internalType": "struct DoctorRegistration.Registration",
+                            "name": "x",
+                            "type": "tuple"
+                        },
+                        {
+                            "components": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "id",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "doctorName",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "incidentDetails",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "date",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "location",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "bool",
+                                    "name": "causedLicenseRevocation",
+                                    "type": "bool"
+                                }
+                            ],
+                            "indexed": false,
+                            "internalType": "struct DoctorRegistration.Incident",
+                            "name": "reason",
+                            "type": "tuple"
+                        }
+                    ],
+                    "name": "DoctorRegistrationRejected",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": true,
+                            "internalType": "address",
+                            "name": "from",
+                            "type": "address"
+                        },
+                        {
+                            "components": [
+                                {
+                                    "internalType": "string",
+                                    "name": "doctorName",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "stateOfRegistration",
+                                    "type": "string"
+                                }
+                            ],
+                            "indexed": false,
+                            "internalType": "struct DoctorRegistration.Registration",
+                            "name": "x",
+                            "type": "tuple"
+                        }
+                    ],
+                    "name": "DoctorRegistrationSubmitted",
+                    "type": "event"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "string",
+                            "name": "doctor",
+                            "type": "string"
+                        },
+                        {
+                            "components": [
+                                {
+                                    "internalType": "string",
+                                    "name": "doctorName",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "stateOfRegistration",
+                                    "type": "string"
+                                }
+                            ],
+                            "internalType": "struct DoctorRegistration.Registration",
+                            "name": "currentRegistration",
+                            "type": "tuple"
+                        },
+                        {
+                            "components": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "id",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "doctorName",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "incidentDetails",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "date",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "location",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "bool",
+                                    "name": "causedLicenseRevocation",
+                                    "type": "bool"
+                                }
+                            ],
+                            "internalType": "struct DoctorRegistration.Incident[]",
+                            "name": "incidentHistory",
+                            "type": "tuple[]"
+                        },
+                        {
+                            "components": [
+                                {
+                                    "internalType": "string",
+                                    "name": "doctorName",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "stateOfRegistration",
+                                    "type": "string"
+                                }
+                            ],
+                            "internalType": "struct DoctorRegistration.Registration[]",
+                            "name": "registrationHistory",
+                            "type": "tuple[]"
+                        }
+                    ],
+                    "name": "validate",
+                    "outputs": [
+                        {
+                            "components": [
+                                {
+                                    "internalType": "enum DoctorRegistration.RegistrationStatus",
+                                    "name": "status",
+                                    "type": "uint8"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "message",
+                                    "type": "string"
+                                }
+                            ],
+                            "internalType": "struct DoctorRegistration.Response",
+                            "name": "",
+                            "type": "tuple"
+                        }
+                    ],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }
+            ]
+        ],
+        "bin": "608060405234801561000f575f80fd5b50610e418061001d5f395ff3fe608060405234801561000f575f80fd5b5060043610610029575f3560e01c80637967062d1461002d575b5f80fd5b610047600480360381019061004291906108af565b61005d565b6040516100549190610aae565b60405180910390f35b6100656103fa565b3373ffffffffffffffffffffffffffffffffffffffff167ff8d32b022730fb2ec997c31aa192e702930dfb6e4c68d7d3fe8cec4697eb4686866040516100ab9190610b0f565b60405180910390a25f5b8383905081146101c4576101428484838181106100d5576100d4610b2f565b5b90506020028101906100e79190610b68565b80602001906100f69190610b8f565b8080601f0160208091040260200160405190810160405280939291908181526020018383808284375f81840152601f19601f8201169050808301925050505050505087602001516103a2565b156101b0575f6040518060400160405280601281526020017f416c7265616479207265676973746572656400000000000000000000000000008152509050604051806040016040528060028081111561019e5761019d610987565b5b81526020018281525092505050610399565b6001816101bd9190610c1e565b90506100b5565b5f855111156102fd575f5b855181146102b0578581815181106101ea576101e9610b2f565b5b602002602001015160a001511561029c575f604051806060016040528060408152602001610dcc6040913990507fe18c71d37f254edd2b7272d6c991d48e0e395d484f6f59fe70e911f26ae6f7218888848151811061024c5761024b610b2f565b5b6020026020010151604051610262929190610d0a565b60405180910390a160405180604001604052806001600281111561028957610288610987565b5b8152602001828152509350505050610399565b6001816102a99190610c1e565b90506101cf565b5f6040518060600160405280603c8152602001610d90603c9139905060405180604001604052805f60028111156102ea576102e9610987565b5b8152602001828152509350505050610399565b7f0a6353fd7fd3fa689474d27f52e28c664f039fd7f3fc993aa4787b77c8ee4cc58660405161032c9190610b0f565b60405180910390a15f6040518060400160405280601881526020017f61636365707465642077697468206e6f206973737565732e0000000000000000815250905060405180604001604052805f600281111561038b5761038a610987565b5b815260200182815250925050505b95945050505050565b5f816040516020016103b49190610d79565b60405160208183030381529060405280519060200120836040516020016103db9190610d79565b6040516020818303038152906040528051906020012014905092915050565b60405180604001604052805f600281111561041857610417610987565b5b8152602001606081525090565b5f604051905090565b5f80fd5b5f80fd5b5f80fd5b5f80fd5b5f601f19601f8301169050919050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52604160045260245ffd5b6104848261043e565b810181811067ffffffffffffffff821117156104a3576104a261044e565b5b80604052505050565b5f6104b5610425565b90506104c1828261047b565b919050565b5f67ffffffffffffffff8211156104e0576104df61044e565b5b6104e98261043e565b9050602081019050919050565b828183375f83830152505050565b5f610516610511846104c6565b6104ac565b9050828152602081018484840111156105325761053161043a565b5b61053d8482856104f6565b509392505050565b5f82601f83011261055957610558610436565b5b8135610569848260208601610504565b91505092915050565b5f80fd5b5f80fd5b5f6040828403121561058f5761058e610572565b5b61059960406104ac565b90505f82013567ffffffffffffffff8111156105b8576105b7610576565b5b6105c484828501610545565b5f83015250602082013567ffffffffffffffff8111156105e7576105e6610576565b5b6105f384828501610545565b60208301525092915050565b5f67ffffffffffffffff8211156106195761061861044e565b5b602082029050602081019050919050565b5f80fd5b5f819050919050565b6106408161062e565b811461064a575f80fd5b50565b5f8135905061065b81610637565b92915050565b5f8115159050919050565b61067581610661565b811461067f575f80fd5b50565b5f813590506106908161066c565b92915050565b5f60c082840312156106ab576106aa610572565b5b6106b560c06104ac565b90505f6106c48482850161064d565b5f83015250602082013567ffffffffffffffff8111156106e7576106e6610576565b5b6106f384828501610545565b602083015250604082013567ffffffffffffffff81111561071757610716610576565b5b61072384828501610545565b604083015250606082013567ffffffffffffffff81111561074757610746610576565b5b61075384828501610545565b606083015250608082013567ffffffffffffffff81111561077757610776610576565b5b61078384828501610545565b60808301525060a061079784828501610682565b60a08301525092915050565b5f6107b56107b0846105ff565b6104ac565b905080838252602082019050602084028301858111156107d8576107d761062a565b5b835b8181101561081f57803567ffffffffffffffff8111156107fd576107fc610436565b5b80860161080a8982610696565b855260208501945050506020810190506107da565b5050509392505050565b5f82601f83011261083d5761083c610436565b5b813561084d8482602086016107a3565b91505092915050565b5f80fd5b5f8083601f84011261086f5761086e610436565b5b8235905067ffffffffffffffff81111561088c5761088b610856565b5b6020830191508360208202830111156108a8576108a761062a565b5b9250929050565b5f805f805f608086880312156108c8576108c761042e565b5b5f86013567ffffffffffffffff8111156108e5576108e4610432565b5b6108f188828901610545565b955050602086013567ffffffffffffffff81111561091257610911610432565b5b61091e8882890161057a565b945050604086013567ffffffffffffffff81111561093f5761093e610432565b5b61094b88828901610829565b935050606086013567ffffffffffffffff81111561096c5761096b610432565b5b6109788882890161085a565b92509250509295509295909350565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52602160045260245ffd5b600381106109c5576109c4610987565b5b50565b5f8190506109d5826109b4565b919050565b5f6109e4826109c8565b9050919050565b6109f4816109da565b82525050565b5f81519050919050565b5f82825260208201905092915050565b5f5b83811015610a31578082015181840152602081019050610a16565b5f8484015250505050565b5f610a46826109fa565b610a508185610a04565b9350610a60818560208601610a14565b610a698161043e565b840191505092915050565b5f604083015f830151610a895f8601826109eb565b5060208301518482036020860152610aa18282610a3c565b9150508091505092915050565b5f6020820190508181035f830152610ac68184610a74565b905092915050565b5f604083015f8301518482035f860152610ae88282610a3c565b91505060208301518482036020860152610b028282610a3c565b9150508091505092915050565b5f6020820190508181035f830152610b278184610ace565b905092915050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52603260045260245ffd5b5f80fd5b5f80fd5b5f80fd5b5f82356001604003833603038112610b8357610b82610b5c565b5b80830191505092915050565b5f8083356001602003843603038112610bab57610baa610b5c565b5b80840192508235915067ffffffffffffffff821115610bcd57610bcc610b60565b5b602083019250600182023603831315610be957610be8610b64565b5b509250929050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52601160045260245ffd5b5f610c288261062e565b9150610c338361062e565b9250828201905080821115610c4b57610c4a610bf1565b5b92915050565b610c5a8161062e565b82525050565b610c6981610661565b82525050565b5f60c083015f830151610c845f860182610c51565b5060208301518482036020860152610c9c8282610a3c565b91505060408301518482036040860152610cb68282610a3c565b91505060608301518482036060860152610cd08282610a3c565b91505060808301518482036080860152610cea8282610a3c565b91505060a0830151610cff60a0860182610c60565b508091505092915050565b5f6040820190508181035f830152610d228185610ace565b90508181036020830152610d368184610c6f565b90509392505050565b5f81905092915050565b5f610d53826109fa565b610d5d8185610d3f565b9350610d6d818560208601610a14565b80840191505092915050565b5f610d848284610d49565b91508190509291505056fe61636365707465642077697468207761726e696e67732c2073696e636520696e636964656e7420686973746f7279206973206e6f7420656d7074792e72656a65637465642064756520746f20616e20696e636964656e74207468617420726573756c74656420696e206c6963656e7365207265766f636174696f6e2ea2646970667358221220fd214df4e271d1771a60ac6b5bdbf8119655d0c7d498832d78c8e610cd0bf23e64736f6c63430008180033"
+      }
+    },
+    "version": "0.8.21+commit.d9974bed.Darwin.appleclang"
+  }
+  
