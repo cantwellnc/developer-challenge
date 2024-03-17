@@ -32,11 +32,34 @@ let apiName: string;
 app.use(bodyparser.json());
 
 app.get("/api/value", async (req, res) => {
-  // query for a list of data
-  // Not ideal, we want to be able to filter this down further based on plaintext tag or something
+  // TODO: break this out into some separate functions.
+  const doctor_name = req.query.doctor
+  console.log(`Doctor: ${req.query.doctor}`)
   const resp = await fireflies[0].getMessages()
   const broadcasts = resp.filter((item) => item.header.type === "broadcast")
-  res.send(broadcasts)
+  const results = []
+  for (const r of broadcasts) {
+    for (const datum of r.data){
+      if (datum.id !== undefined) {
+        const item: any = await fireflies[0].getData(datum.id)
+        if (typeof item.value == "string") {
+          // we have found a message that is NOT a smart contract deployment, so accumulate. 
+          const content = JSON.parse(item.value)
+          try {
+            // it may not be valid JSON though, so let's parse if it possible.
+            const validContent = JSON.parse(content)
+            if (validContent.doctor == doctor_name) {
+              results.push(content)
+            }
+          }
+          catch (e: any) {
+            console.error(`Ignoring ${content} , since it is not valid JSON.`)
+          }
+        }
+      }
+    }
+  }
+  res.send(results)
 });
 
 app.post("/api/value", async (req, res) => {
@@ -66,50 +89,50 @@ app.post("/api/value", async (req, res) => {
 });
 
 async function init() {
-  const deployRes = await fireflies[0].deployContract(
-    {
-      definition:
-        simplestorage.contracts["simple_storage.sol:SimpleStorage"].abi,
-      contract: simplestorage.contracts["simple_storage.sol:SimpleStorage"].bin,
-      input: ["0"],
-    },
-    { confirm: true },
-  );
-  const contractAddress = deployRes.output.contractLocation.address;
+  // const deployRes = await fireflies[0].deployContract(
+  //   {
+  //     definition:
+  //       simplestorage.contracts["simple_storage.sol:SimpleStorage"].abi,
+  //     contract: simplestorage.contracts["simple_storage.sol:SimpleStorage"].bin,
+  //     input: ["0"],
+  //   },
+  //   { confirm: true },
+  // );
+  // const contractAddress = deployRes.output.contractLocation.address;
 
-  const generatedFFI = await fireflies[0].generateContractInterface({
-    name: uuidv4(),
-    namespace: NAMESPACE,
-    version: "1.0",
-    description: "Auto-deployed simple-storage contract",
-    input: {
-      abi: simplestorage.contracts["simple_storage.sol:SimpleStorage"].abi,
-    },
-  });
+  // const generatedFFI = await fireflies[0].generateContractInterface({
+  //   name: uuidv4(),
+  //   namespace: NAMESPACE,
+  //   version: "1.0",
+  //   description: "Auto-deployed simple-storage contract",
+  //   input: {
+  //     abi: simplestorage.contracts["simple_storage.sol:SimpleStorage"].abi,
+  //   },
+  // });
 
-  const contractInterface = await fireflies[0].createContractInterface(
-    generatedFFI,
-    { confirm: true },
-  );
+  // const contractInterface = await fireflies[0].createContractInterface(
+  //   generatedFFI,
+  //   { confirm: true },
+  // );
 
-  const contractAPI = await fireflies[0].createContractAPI(
-    {
-      interface: {
-        id: contractInterface.id,
-      },
-      location: {
-        address: contractAddress,
-      },
-      name: uuidv4(),
-    },
-    { confirm: true },
-  );
+  // const contractAPI = await fireflies[0].createContractAPI(
+  //   {
+  //     interface: {
+  //       id: contractInterface.id,
+  //     },
+  //     location: {
+  //       address: contractAddress,
+  //     },
+  //     name: uuidv4(),
+  //   },
+  //   { confirm: true },
+  // );
 
-  apiName = contractAPI.name;
+  // apiName = contractAPI.name;
 
-  const listener = await fireflies[0].createContractAPIListener(apiName, "Changed", {
-    topic: "changed",
-  });
+  // const listener = await fireflies[0].createContractAPIListener(apiName, "Changed", {
+  //   topic: "changed",
+  // });
 
   // Listen for blockchain events on all nodes, logging out events as they happen
   fireflies.map((firefly) =>

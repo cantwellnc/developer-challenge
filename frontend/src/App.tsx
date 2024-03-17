@@ -32,9 +32,10 @@ function App() {
     setLoading(true);
     setErrorMsg(null);
     try {
-      const res = await fetch(`/api/value`);
-      // unpacking is tricky. the below line had me confused for a minute. 
-      // accessing nonexistent property on an object is just undefined; it doesn't throw an error
+      // Add query params, pointing to value rn but this will change.
+      const res = await fetch(`/api/value?` + new URLSearchParams({
+        doctor: 'andre',
+      }));
       const resJSON = await res.json();
       console.log(resJSON)
       if (!res.ok) {
@@ -72,7 +73,7 @@ function App() {
             Set Value
           </button>
         </p>
-        <p>
+        <p className = "limit">
           <button
             type="button"
             className="App-button"
