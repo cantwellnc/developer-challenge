@@ -1,6 +1,6 @@
 {
     "contracts": {
-      "simple_storage.sol:SimpleStorage": {
+      "doctor_registration.sol:DoctorRegistration": {
         "abi": [
             [
                 {
