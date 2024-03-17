@@ -112,7 +112,7 @@ function App() {
   }
 
   // TODO: 
-  // 1) create separate change handlers for each input field DONE
+  // 1) create separate change handlers for each input field. DONE
   // 2) create separate set/get api invocations for each "section": Incident report, patient query, doctor registration
   // 3) beautify the input + output for each section (least important). Focus on functionality.
   return (

@@ -1,7 +1,7 @@
 import FireFly, { FireFlySubscriptionBase } from "@hyperledger/firefly-sdk";
 import express from "express";
 import bodyparser, { json } from "body-parser";
-import simplestorage from "../contracts/simple_storage.json";
+import doctorregistration from "../contracts/doctor_registration.json";
 import { v4 as uuidv4 } from "uuid";
 
 // TODOS:
@@ -31,37 +31,38 @@ const fireflies = HOSTS.map(
 let apiName: string;
 app.use(bodyparser.json());
 
+// Querying Incidents
 app.get("/api/value", async (req, res) => {
   // TODO: break this out into some separate functions.
-  const doctor_name = req.query.doctor
-  console.log(`Doctor: ${req.query.doctor}`)
-  const resp = await fireflies[0].getMessages()
-  const broadcasts = resp.filter((item) => item.header.type === "broadcast")
-  const results = []
+  const doctor_name = req.query.doctor;
+  console.log(`Doctor: ${req.query.doctor}`);
+  const resp = await fireflies[0].getMessages();
+  const broadcasts = resp.filter((item) => item.header.type === "broadcast");
+  const results = [];
   for (const r of broadcasts) {
-    for (const datum of r.data){
+    for (const datum of r.data) {
       if (datum.id !== undefined) {
-        const item: any = await fireflies[0].getData(datum.id)
+        const item: any = await fireflies[0].getData(datum.id);
         if (typeof item.value == "string") {
-          // we have found a message that is NOT a smart contract deployment, so accumulate. 
-          const content = JSON.parse(item.value)
+          // we have found a message that is NOT a smart contract deployment, so accumulate.
+          const content = JSON.parse(item.value);
           try {
             // it may not be valid JSON though, so let's parse if it possible.
-            const validContent = JSON.parse(content)
+            const validContent = JSON.parse(content);
             if (validContent.doctor == doctor_name) {
-              results.push(content)
+              results.push(content);
             }
-          }
-          catch (e: any) {
-            console.error(`Ignoring ${content} , since it is not valid JSON.`)
+          } catch (e: any) {
+            console.error(`Ignoring ${content} , since it is not valid JSON.`);
           }
         }
       }
     }
   }
-  res.send(results)
+  res.send(results);
 });
 
+// Reporting Incidents
 app.post("/api/value", async (req, res) => {
   try {
     // upload the data to ex: node 1
@@ -88,65 +89,117 @@ app.post("/api/value", async (req, res) => {
   }
 });
 
+// Registrations
+app.post("/api/register", async (req, res) => {
+    // try {
+    //   const fireflyRes = await firefly.invokeContractAPI(apiName, "set", {
+    //     input: {
+    //       x: req.body.x,
+    //     },
+    //   });
+    //   res.status(202).send({
+    //     id: fireflyRes.id,
+    //   });
+    // } catch (e: any) {
+    //   res.status(500).send({
+    //     error: e.message,
+    //   });
+    // }
+  const message = "/api/register says stop hitting me";
+  console.log(message);
+  res.send(message);
+});
+
 async function init() {
-  // const deployRes = await fireflies[0].deployContract(
-  //   {
-  //     definition:
-  //       simplestorage.contracts["simple_storage.sol:SimpleStorage"].abi,
-  //     contract: simplestorage.contracts["simple_storage.sol:SimpleStorage"].bin,
-  //     input: ["0"],
-  //   },
-  //   { confirm: true },
-  // );
-  // const contractAddress = deployRes.output.contractLocation.address;
 
-  // const generatedFFI = await fireflies[0].generateContractInterface({
-  //   name: uuidv4(),
-  //   namespace: NAMESPACE,
-  //   version: "1.0",
-  //   description: "Auto-deployed simple-storage contract",
-  //   input: {
-  //     abi: simplestorage.contracts["simple_storage.sol:SimpleStorage"].abi,
-  //   },
-  // });
+  // Deploy registration contract to all nodes
+  fireflies.map(async (firefly) => {
 
-  // const contractInterface = await fireflies[0].createContractInterface(
-  //   generatedFFI,
-  //   { confirm: true },
-  // );
+    const deployRes = await fireflies[0].deployContract(
+      {
+        definition:
+          doctorregistration.contracts[
+            "doctor_registration.sol:DoctorRegistration"
+          ].abi,
+        contract:
+          doctorregistration.contracts[
+            "doctor_registration.sol:DoctorRegistration"
+          ].bin,
+        // input: ["0"],
+      },
+      { confirm: true },
+    );
+    const contractAddress = deployRes.output.contractLocation.address;
 
-  // const contractAPI = await fireflies[0].createContractAPI(
-  //   {
-  //     interface: {
-  //       id: contractInterface.id,
-  //     },
-  //     location: {
-  //       address: contractAddress,
-  //     },
-  //     name: uuidv4(),
-  //   },
-  //   { confirm: true },
-  // );
+    const generatedFFI = await firefly.generateContractInterface({
+      name: uuidv4(),
+      namespace: NAMESPACE,
+      version: "1.0",
+      description: "Successfully deployed doctor registration contract.",
+      input: {
+        abi: doctorregistration.contracts[
+          "doctor_registration.sol:DoctorRegistration"
+        ].abi,
+      },
+    });
 
-  // apiName = contractAPI.name;
+    const contractInterface = await firefly.createContractInterface(
+      generatedFFI,
+      { confirm: true },
+    );
 
-  // const listener = await fireflies[0].createContractAPIListener(apiName, "Changed", {
-  //   topic: "changed",
-  // });
+    const contractAPI = await firefly.createContractAPI(
+      {
+        interface: {
+          id: contractInterface.id,
+        },
+        location: {
+          address: contractAddress,
+        },
+        name: uuidv4(),
+      },
+      { confirm: true },
+    );
 
-  // Listen for blockchain events on all nodes, logging out events as they happen
-  fireflies.map((firefly) =>
+    apiName = contractAPI.name;
+    
+    const submittedListener = await firefly.createContractAPIListener(
+      apiName,
+      "DoctorRegistrationSubmitted",
+      {
+        topic: "submitted",
+      },
+    );
+    
+    const acceptedListener = await firefly.createContractAPIListener(
+      apiName,
+      "DoctorRegistrationAccepted",
+      {
+        topic: "accepted",
+      },
+    );
+
+    const rejectedListener = await firefly.createContractAPIListener(
+      apiName,
+      "DoctorRegistrationRejected",
+      {
+        topic: "rejected",
+      },
+    );
+
     firefly.listen(
       {
         filter: {
-          events: "blockchain_event_received",
+          events: "blockchain_event_received,DoctorRegistrationSubmitted",
         },
       },
       async (socket, event) => {
         console.log(event.blockchainEvent?.output);
       },
-    ),
-  );
+    );
+  });
+
+  // Listen for blockchain events on all nodes, logging out events as they happen
 
   // Start listening
   app.listen(PORT, () =>
