@@ -4,15 +4,19 @@ import "./App.css";
 function App() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
-  const [desiredValue, setDesiredValue] = useState("test");
-  const [value, setValue] = useState("");
+  const [queryResponse, setQueryResponse] = useState("");
 
   // Doctor name
   const [doctorName, setDoctorName] = useState("");
   // Incident report 
   const [incidentReport, setIncidentReport] = useState("");
 
-  async function addNewMalpraticeRecord() {
+  // Doctor registration input
+  const [registrationInput, setRegistrationInput] = useState("");
+  // Doctor registration status after an attempted registration
+  const [registrationStatus, setRegistrationStatus] = useState("");
+
+  async function addNewIncident() {
     setLoading(true);
     setErrorMsg(null);
     try {
@@ -33,7 +37,7 @@ function App() {
     setLoading(false);
   }
 
-  async function getMalpracticeRecords() {
+  async function getIncidents() {
     setLoading(true);
     setErrorMsg(null);
     try {
@@ -42,20 +46,18 @@ function App() {
         doctor: doctorName,
       }));
       const resJSON = await res.json()
-      // console.log(`RAW: ${resJSON[0].doctor}`)
       const incidents = resJSON.map((item: any) => JSON.parse(item));
       console.log(`INCIDENTS: ${incidents}`)
       if (!res.ok) {
         setErrorMsg(resJSON.error);
       } else {
-        setValue(JSON.stringify(incidents));
+        setQueryResponse(JSON.stringify(incidents));
       }
     } catch (err: any) {
       setErrorMsg(err.stack);
     }
     setLoading(false);
   }
-
 
   async function invokeContract() {
     setLoading(true);
@@ -64,14 +66,15 @@ function App() {
       const res = await fetch(`/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify(JSON.parse(registrationInput)),
       });
       const resJSON = await res.json()
       if (!res.ok) {
         setErrorMsg(resJSON.error);
       }
       else {
-        console.log(`RESPONSE: ${resJSON}`)
+        console.log(`RESPONSE: ${JSON.stringify(resJSON)}`)
+        setRegistrationStatus(JSON.stringify(resJSON))
       }
     } catch (err: any) {
       setErrorMsg(err.stack);
@@ -79,16 +82,16 @@ function App() {
     setLoading(false);
   }
 
-  // function handleChange(event: FormEvent<HTMLInputElement>) {
-  //   setDesiredValue(event.currentTarget.value);
-  // }
-
   function handleIncidentReportInput(event: FormEvent<HTMLInputElement>) {
     setIncidentReport(event.currentTarget.value);
   }
 
   function handleDoctorNameInput(event: FormEvent<HTMLInputElement>) {
     setDoctorName(event.currentTarget.value);
+  }
+
+  function handleDoctorRegistrationInput(event: FormEvent<HTMLInputElement>) {
+    setRegistrationInput(event.currentTarget.value);
   }
 
   // TODO: 
@@ -105,7 +108,7 @@ function App() {
           <button
             type="button"
             className="App-button"
-            onClick={addNewMalpraticeRecord}
+            onClick={addNewIncident}
           >
             Submit
           </button>
@@ -118,25 +121,25 @@ function App() {
           <button
             type="button"
             className="App-button"
-            onClick={getMalpracticeRecords}
+            onClick={getIncidents}
           >
             Submit
           </button>
-          {value !== "" ? <p> {value}</p> : <p>&nbsp;</p>}
+          {queryResponse !== "" ? <p> {queryResponse}</p> : <p>&nbsp;</p>}
         </p>
 
         {/* Doctor registration (for ex: medical board licensure in new state) */}
         <p>
           <span>Doctor Registration: </span>
-          <input className="doctor-registration"/>
+          <input className="doctor-registration" onChange={handleDoctorRegistrationInput}/>
           <button
             type="button"
             className="App-button"
             onClick={invokeContract}
           >
-            Set Value
+            Submit
           </button>
-          
+          {registrationStatus !== "" ? <p> {registrationStatus}</p> : <p>&nbsp;</p>}
         </p>
 
         {/* Error message display */}

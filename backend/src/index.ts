@@ -12,7 +12,18 @@ import { v4 as uuidv4 } from "uuid";
 // 4) experiment with deploying a smart contract for managing doctor registration. How can we:
 // a) trigger the contract to run on doctor registration submission, ex: emit DoctorRegistrationSubmitted(doctor_name, doctor_uid, location)
 // b) feed the contract the doctor's practice history (can be binary indicator, or a threshold determined by frequency of occurrences or something)
-//  on the chain? Is this easy?
+//  on the chain? Is this easy? DONE
+
+// 5) Route to different nodes based on form values to represent single peers getting reports + then propagating to others
+
+// {
+//   "id": 123456789012,
+//   "doctorName": "doc oc",
+//   "incidentDetails": "smashed some folks with he tentacles",
+//   "date": "3/17/24",
+//   "location": "Raleigh, NC",
+//   "causedLicenseRevocation": true
+// }
 
 const PORT = 4001;
 // this puts all the stuff we want onto a single firefly supernode
@@ -92,40 +103,50 @@ app.post("/api/value", async (req, res) => {
 
 // Registrations
 app.post("/api/register", async (req, res) => {
-
-    // just run on one node for now, but can map across and get consensus via max vote on results if we wanted? 
-    try {
-      const fireflyRes = await fireflies[0].invokeContractAPI(apiName, "validate", {
-        // input: {
-        //   doctor: req.body.doctor,
-        // },
-
+  // just run on one node for now, but can map across and get consensus via max vote on results if we wanted?
+  try {
+    console.log(`INVOKED with ${JSON.stringify(req.body)}`)
+    const fireflyRes = await fireflies[0].invokeContractAPI(
+      apiName,
+      "validate",
+      {
         // Hardcoded input for now, just to see if we can actually call contract
         input: {
-          currentRegistration: ["doc oc", "NC"],
-          incidentHistory: [[123456789012, "doc oc", "bashed with tentacle", "2/7/24", "Raleigh, NC", true]],
-          registrationHistory: [["doc oc", "OK"], ["doc oc", "KS"]]
-        }
-      });
-      res.status(202).send({
-        id: fireflyRes.id,
-        output: fireflyRes.output
-      });
-    } catch (e: any) {
-      res.status(500).send({
-        error: e.message,
-      });
-    }
-  const message = "/api/register says stop hitting me";
-  console.log(message);
-  res.send(message);
+          currentRegistration: {
+            doctorName: "doc oc",
+            stateOfRegistration: "NC",
+          },
+          incidentHistory: [
+            {
+              id: 123456789012,
+              doctorName: "doc oc",
+              incidentDetails: "bashed em with tentacle",
+              date: "2/7/24",
+              location: "Raleigh, NC",
+              causedLicenseRevocation: true,
+            },
+          ],
+          registrationHistory: [
+            { doctorName: "doc oc", stateOfRegistration: "OK" },
+            { doctorName: "doc oc", stateOfRegistration: "KS" },
+          ],
+        },
+      },
+    );
+    res.status(202).send({
+      id: fireflyRes.id,
+      output: fireflyRes.output,
+    });
+  } catch (e: any) {
+    res.status(500).send({
+      error: e.message,
+    });
+  }
 });
 
 async function init() {
-
   // Deploy registration contract to all nodes
   fireflies.map(async (firefly) => {
-
     const deployRes = await firefly.deployContract(
       {
         definition:
@@ -173,7 +194,7 @@ async function init() {
     );
 
     apiName = contractAPI.name;
-    
+
     const submittedListener = await firefly.createContractAPIListener(
       apiName,
       "DoctorRegistrationSubmitted",
@@ -181,7 +202,7 @@ async function init() {
         topic: "submitted",
       },
     );
-    
+
     const acceptedListener = await firefly.createContractAPIListener(
       apiName,
       "DoctorRegistrationAccepted",
