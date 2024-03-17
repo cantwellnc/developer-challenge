@@ -24,7 +24,7 @@ function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          x: incidentReport,
+          incident: incidentReport,
         }),
       });
       const { error } = await res.json();
@@ -65,8 +65,8 @@ function App() {
     try {
       const res = await fetch(`/api/register`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(JSON.parse(registrationInput)),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({currentRegistration: JSON.parse(registrationInput)}),
       });
       const resJSON = await res.json()
       if (!res.ok) {

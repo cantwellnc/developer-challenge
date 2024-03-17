@@ -79,7 +79,7 @@ app.post("/api/value", async (req, res) => {
   try {
     // upload the data to ex: node 1
     const fireflyRes = await fireflies[0].uploadData({
-      value: JSON.stringify(req.body.x),
+      value: JSON.stringify(req.body.incident),
     });
 
     // broadcast to peers
@@ -105,17 +105,14 @@ app.post("/api/value", async (req, res) => {
 app.post("/api/register", async (req, res) => {
   // just run on one node for now, but can map across and get consensus via max vote on results if we wanted?
   try {
-    console.log(`INVOKED with ${JSON.stringify(req.body)}`)
     const fireflyRes = await fireflies[0].invokeContractAPI(
       apiName,
       "validate",
       {
         // Hardcoded input for now, just to see if we can actually call contract
         input: {
-          currentRegistration: {
-            doctorName: "doc oc",
-            stateOfRegistration: "NC",
-          },
+          currentRegistration: req.body.currentRegistration,
+          // TODO: replace incidentHistory and registrationHistory with api calls
           incidentHistory: [
             {
               id: 123456789012,
