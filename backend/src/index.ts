@@ -36,6 +36,7 @@ app.get("/api/value", async (req, res) => {
   // TODO: break this out into some separate functions.
   const doctor_name = req.query.doctor;
   console.log(`Doctor: ${req.query.doctor}`);
+
   const resp = await fireflies[0].getMessages();
   const broadcasts = resp.filter((item) => item.header.type === "broadcast");
   const results = [];
@@ -91,20 +92,30 @@ app.post("/api/value", async (req, res) => {
 
 // Registrations
 app.post("/api/register", async (req, res) => {
-    // try {
-    //   const fireflyRes = await firefly.invokeContractAPI(apiName, "set", {
-    //     input: {
-    //       x: req.body.x,
-    //     },
-    //   });
-    //   res.status(202).send({
-    //     id: fireflyRes.id,
-    //   });
-    // } catch (e: any) {
-    //   res.status(500).send({
-    //     error: e.message,
-    //   });
-    // }
+
+    // just run on one node for now, but can map across and get consensus via max vote on results if we wanted? 
+    try {
+      const fireflyRes = await fireflies[0].invokeContractAPI(apiName, "validate", {
+        // input: {
+        //   doctor: req.body.doctor,
+        // },
+
+        // Hardcoded input for now, just to see if we can actually call contract
+        input: {
+          currentRegistration: ["doc oc", "NC"],
+          incidentHistory: [[123456789012, "doc oc", "bashed with tentacle", "2/7/24", "Raleigh, NC", true]],
+          registrationHistory: [["doc oc", "OK"], ["doc oc", "KS"]]
+        }
+      });
+      res.status(202).send({
+        id: fireflyRes.id,
+        output: fireflyRes.output
+      });
+    } catch (e: any) {
+      res.status(500).send({
+        error: e.message,
+      });
+    }
   const message = "/api/register says stop hitting me";
   console.log(message);
   res.send(message);
@@ -190,7 +201,7 @@ async function init() {
     firefly.listen(
       {
         filter: {
-          events: "blockchain_event_received,DoctorRegistrationSubmitted",
+          events: "blockchain_event_received",
         },
       },
       async (socket, event) => {

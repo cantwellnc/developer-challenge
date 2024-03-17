@@ -37,7 +37,7 @@ contract DoctorRegistration {
         return keccak256(abi.encodePacked(str1)) == keccak256(abi.encodePacked(str2));
     }
 
-    function validate(string memory doctor, Registration memory currentRegistration, Incident[] memory incidentHistory, Registration[] calldata registrationHistory) public returns (Response memory ) {
+    function validate(Registration memory currentRegistration, Incident[] memory incidentHistory, Registration[] calldata registrationHistory) public returns (Response memory ) {
 
         // Emit to chain that this doctor is attempting to register
         emit DoctorRegistrationSubmitted(msg.sender, currentRegistration);
@@ -73,6 +73,7 @@ contract DoctorRegistration {
         emit DoctorRegistrationAccepted(currentRegistration);
         string memory message = "accepted with no issues.";
         return Response(RegistrationStatus.ACCEPTED, message);
+
         
     }
 
