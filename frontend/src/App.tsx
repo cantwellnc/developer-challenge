@@ -16,7 +16,18 @@ function App() {
   // Doctor registration status after an attempted registration
   const [registrationStatus, setRegistrationStatus] = useState("");
 
+
+ 
   async function addNewIncident() {
+    // Example Incident 
+    // {
+    //   "id": 123456789012,
+    //   "doctorName": "doc oc",
+    //   "incidentDetails": "smashed some folks with he tentacles",
+    //   "date": "3/17/24",
+    //   "location": "Raleigh, NC",
+    //   "causedLicenseRevocation": true
+    // }
     setLoading(true);
     setErrorMsg(null);
     try {
@@ -37,7 +48,11 @@ function App() {
     setLoading(false);
   }
 
+
+
   async function getIncidents() {
+    // Example query  
+    // "doc oc",
     setLoading(true);
     setErrorMsg(null);
     try {
@@ -60,6 +75,11 @@ function App() {
   }
 
   async function invokeContract() {
+    // Example Registration
+    // {
+    //   "doctorName": "doc oc", 
+    //   "stateOfRegistration": "NC"
+    // }
     setLoading(true);
     setErrorMsg(null);
     try {
@@ -96,7 +116,7 @@ function App() {
 
   // TODO: 
   // 1) create separate change handlers for each input field. DONE
-  // 2) create separate set/get api invocations for each "section": Incident report, patient query, doctor registration
+  // 2) create separate set/get api invocations for each "section": Incident report, patient query, doctor registration DONE
   // 3) beautify the input + output for each section (least important). Focus on functionality.
   return (
     <div className="App">

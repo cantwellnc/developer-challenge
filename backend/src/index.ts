@@ -13,26 +13,14 @@ import { v4 as uuidv4 } from "uuid";
 // a) trigger the contract to run on doctor registration submission, ex: emit DoctorRegistrationSubmitted(doctor_name, doctor_uid, location)
 // b) feed the contract the doctor's practice history (can be binary indicator, or a threshold determined by frequency of occurrences or something)
 //  on the chain? Is this easy? DONE
-
 // 5) Route to different nodes based on form values to represent single peers getting reports + then propagating to others
 
-// {
-//   "id": 123456789012,
-//   "doctorName": "doc oc",
-//   "incidentDetails": "smashed some folks with he tentacles",
-//   "date": "3/17/24",
-//   "location": "Raleigh, NC",
-//   "causedLicenseRevocation": true
-// }
-
 const PORT = 4001;
-// this puts all the stuff we want onto a single firefly supernode
 const HOSTS = [
   "http://localhost:5000",
   "http://localhost:5001",
   "http://localhost:5002",
 ];
-// it was set to 5000 (ip of first node), so that's why we only saw certain events (ex: txns) there.
 const NAMESPACE = "default";
 const app = express();
 const fireflies = HOSTS.map(
@@ -45,29 +33,32 @@ app.use(bodyparser.json());
 // Querying Incidents
 app.get("/api/value", async (req, res) => {
   // TODO: break this out into some separate functions.
-  const doctor_name = req.query.doctor;
+  const doctorName = req.query.doctor;
   console.log(`Doctor: ${req.query.doctor}`);
-
-  const resp = await fireflies[0].getMessages();
-  const broadcasts = resp.filter((item) => item.header.type === "broadcast");
-  const results = [];
+  const resp = await Promise.all(fireflies.map(async (firefly) => firefly.getMessages()));
+  const broadcasts = resp.flat().filter((item) => item.header.type === "broadcast");
+  const results= [];
   for (const r of broadcasts) {
     for (const datum of r.data) {
       if (datum.id !== undefined) {
-        const item: any = await fireflies[0].getData(datum.id);
-        if (typeof item.value == "string") {
-          // we have found a message that is NOT a smart contract deployment, so accumulate.
-          const content = JSON.parse(item.value);
-          try {
-            // it may not be valid JSON though, so let's parse if it possible.
-            const validContent = JSON.parse(content);
-            if (validContent.doctor == doctor_name) {
-              results.push(content);
+        // get data across all nodes, potentially producing duplicates
+        const dataItems: any = await Promise.all(fireflies.map(async (firefly) => firefly.getData(datum.id!)));
+        for (const item of dataItems) {
+          if (typeof item.value == "string") {
+            // we have found a message that is NOT a smart contract deployment, so accumulate.
+            const content = JSON.parse(item.value);
+            try {
+              // it may not be valid JSON though, so let's parse if it possible.
+              const validContent = JSON.parse(content);
+              if (validContent.doctorName == doctorName) {
+                results.push(content);
+              }
+            } catch (e: any) {
+              console.error(`Ignoring ${content} , since it is not valid JSON.`);
             }
-          } catch (e: any) {
-            console.error(`Ignoring ${content} , since it is not valid JSON.`);
           }
         }
+        
       }
     }
   }
@@ -103,7 +94,8 @@ app.post("/api/value", async (req, res) => {
 
 // Registrations
 app.post("/api/register", async (req, res) => {
-  // just run on one node for now, but can map across and get consensus via max vote on results if we wanted?
+  // just run on one node for now, but a TODO would be to route to a different node depending on 
+  // location or something like that
   try {
     const fireflyRes = await fireflies[0].invokeContractAPI(
       apiName,
