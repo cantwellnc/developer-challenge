@@ -61,12 +61,12 @@ function App() {
         doctor: doctorName,
       }));
       const resJSON = await res.json()
-      const incidents = resJSON.map((item: any) => JSON.parse(item));
+      const incidents = new Set(resJSON.map((item: any) => JSON.stringify(JSON.parse(item))));
       console.log(`INCIDENTS: ${incidents}`)
       if (!res.ok) {
         setErrorMsg(resJSON.error);
       } else {
-        setQueryResponse(JSON.stringify(incidents));
+        setQueryResponse(JSON.stringify([...incidents]));
       }
     } catch (err: any) {
       setErrorMsg(err.stack);
