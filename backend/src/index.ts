@@ -114,7 +114,7 @@ app.post("/api/register", async (req, res) => {
           currentRegistration: req.body.currentRegistration,
           // TODO: replace incidentHistory and registrationHistory with api calls
           incidentHistory:
-            req.body.doctorName === "doc oc"
+            req.body.currentRegistration.doctorName === "doc oc"
               ? [
                   {
                     id: 123456789012,
