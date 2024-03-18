@@ -32,17 +32,24 @@ app.use(bodyparser.json());
 
 // Querying Incidents
 app.get("/api/value", async (req, res) => {
-  // TODO: break this out into some separate functions.
+  // TODO: break this out into some separate functions to make it more readable
   const doctorName = req.query.doctor;
   console.log(`Doctor: ${req.query.doctor}`);
-  const resp = await Promise.all(fireflies.map(async (firefly) => firefly.getMessages()));
-  const broadcasts = resp.flat().filter((item) => item.header.type === "broadcast");
-  const results= [];
+  const resp = await Promise.all(
+    fireflies.map(async (firefly) => firefly.getMessages()),
+  );
+  const broadcasts = resp
+    .flat()
+    .filter((item) => item.header.type === "broadcast");
+  const results = [];
   for (const r of broadcasts) {
     for (const datum of r.data) {
       if (datum.id !== undefined) {
         // get data across all nodes, potentially producing duplicates
-        const dataItems: any = await Promise.all(fireflies.map(async (firefly) => firefly.getData(datum.id!)));
+        const dataItems: any = await Promise.all(
+          fireflies.map(async (firefly) => firefly.getData(datum.id!)),
+        );
+        console.log(dataItems);
         for (const item of dataItems) {
           if (typeof item.value == "string") {
             // we have found a message that is NOT a smart contract deployment, so accumulate.
@@ -54,11 +61,12 @@ app.get("/api/value", async (req, res) => {
                 results.push(content);
               }
             } catch (e: any) {
-              console.error(`Ignoring ${content} , since it is not valid JSON.`);
+              console.error(
+                `Ignoring ${content} , since it is not valid JSON.`,
+              );
             }
           }
         }
-        
       }
     }
   }
@@ -94,7 +102,7 @@ app.post("/api/value", async (req, res) => {
 
 // Registrations
 app.post("/api/register", async (req, res) => {
-  // just run on one node for now, but a TODO would be to route to a different node depending on 
+  // just run on one node for now, but a TODO would be to route to a different node depending on
   // location or something like that
   try {
     const fireflyRes = await fireflies[0].invokeContractAPI(
@@ -105,20 +113,31 @@ app.post("/api/register", async (req, res) => {
         input: {
           currentRegistration: req.body.currentRegistration,
           // TODO: replace incidentHistory and registrationHistory with api calls
-          incidentHistory: [
-            {
-              id: 123456789012,
-              doctorName: "doc oc",
-              incidentDetails: "bashed em with tentacle",
-              date: "2/7/24",
-              location: "Raleigh, NC",
-              causedLicenseRevocation: true,
-            },
-          ],
-          registrationHistory: [
-            { doctorName: "doc oc", stateOfRegistration: "OK" },
-            { doctorName: "doc oc", stateOfRegistration: "KS" },
-          ],
+          incidentHistory:
+            req.body.doctorName === "doc oc"
+              ? [
+                  {
+                    id: 123456789012,
+                    doctorName: "doc oc",
+                    incidentDetails: "bashed em with tentacle",
+                    date: "2/7/24",
+                    location: "Raleigh, NC",
+                    causedLicenseRevocation: true,
+                  },
+                ]
+              : [],
+          registrationHistory:
+            req.body.currentRegistration.doctorName === "doc oc"
+              ? [
+                  { doctorName: "doc oc", stateOfRegistration: "OK" },
+                  { doctorName: "doc oc", stateOfRegistration: "NC" },
+                ]
+              : [
+                  {
+                    doctorName: req.body.currentRegistration.doctorName,
+                    stateOfRegistration: "NC",
+                  },
+                ],
         },
       },
     );

@@ -8,7 +8,7 @@ function App() {
 
   // Doctor name
   const [doctorName, setDoctorName] = useState("");
-  // Incident report 
+  // Incident report
   const [incidentReport, setIncidentReport] = useState("");
 
   // Doctor registration input
@@ -16,10 +16,8 @@ function App() {
   // Doctor registration status after an attempted registration
   const [registrationStatus, setRegistrationStatus] = useState("");
 
-
- 
   async function addNewIncident() {
-    // Example Incident 
+    // Example Incident
     // {
     //   "id": 123456789012,
     //   "doctorName": "doc oc",
@@ -48,25 +46,30 @@ function App() {
     setLoading(false);
   }
 
-
-
   async function getIncidents() {
-    // Example query  
+    // Example query
     // "doc oc",
     setLoading(true);
     setErrorMsg(null);
     try {
       // Add query params, pointing to value rn but this will change.
-      const res = await fetch(`/api/value?` + new URLSearchParams({
-        doctor: doctorName,
-      }));
-      const resJSON = await res.json()
-      const incidents = new Set(resJSON.map((item: any) => JSON.stringify(JSON.parse(item))));
-      console.log(`INCIDENTS: ${incidents}`)
+      const res = await fetch(
+        `/api/value?` +
+          new URLSearchParams({
+            doctor: doctorName,
+          }),
+      );
+      const resJSON = await res.json();
+      const incidents = new Set(
+        resJSON.map((item: any) => JSON.stringify(JSON.parse(item))),
+      );
+      console.log(`INCIDENTS: ${incidents}`);
       if (!res.ok) {
         setErrorMsg(resJSON.error);
       } else {
-        setQueryResponse(JSON.stringify([...incidents].map((item) => JSON.parse(item))));
+        setQueryResponse(
+          JSON.stringify([...incidents].map((item) => JSON.parse(item))),
+        );
       }
     } catch (err: any) {
       setErrorMsg(err.stack);
@@ -77,24 +80,28 @@ function App() {
   async function invokeContract() {
     // Example Registration
     // {
-    //   "doctorName": "doc oc", 
+    //   "doctorName": "doc oc",
     //   "stateOfRegistration": "NC"
     // }
+    // I really wanted to be able to see the output of the contract,
+    // but I wasn't able to figure out how to do that from within firefly.
+    // I could see it in remix just fine....
     setLoading(true);
     setErrorMsg(null);
     try {
       const res = await fetch(`/api/register`, {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({currentRegistration: JSON.parse(registrationInput)}),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentRegistration: JSON.parse(registrationInput),
+        }),
       });
-      const resJSON = await res.json()
+      const resJSON = await res.json();
       if (!res.ok) {
         setErrorMsg(resJSON.error);
-      }
-      else {
-        console.log(`RESPONSE: ${JSON.stringify(resJSON)}`)
-        setRegistrationStatus(JSON.stringify(resJSON))
+      } else {
+        console.log(`RESPONSE: ${JSON.stringify(resJSON)}`);
+        setRegistrationStatus(JSON.stringify(resJSON));
       }
     } catch (err: any) {
       setErrorMsg(err.stack);
@@ -114,7 +121,7 @@ function App() {
     setRegistrationInput(event.currentTarget.value);
   }
 
-  // TODO: 
+  // TODO:
   // 1) create separate change handlers for each input field. DONE
   // 2) create separate set/get api invocations for each "section": Incident report, patient query, doctor registration DONE
   // 3) beautify the input + output for each section (least important). Focus on functionality.
@@ -124,12 +131,11 @@ function App() {
         {/* Report an Incident */}
         <p>
           <span>Report a new incident: </span>
-          <input className="incident-input" onChange={handleIncidentReportInput} />
-          <button
-            type="button"
-            className="App-button"
-            onClick={addNewIncident}
-          >
+          <input
+            className="incident-input"
+            onChange={handleIncidentReportInput}
+          />
+          <button type="button" className="App-button" onClick={addNewIncident}>
             Submit
           </button>
         </p>
@@ -137,12 +143,8 @@ function App() {
         {/* Query malpractice incident history */}
         <p>
           <span>Fetch malpractice records by doctor name: </span>
-          <input onChange={handleDoctorNameInput}/>
-          <button
-            type="button"
-            className="App-button"
-            onClick={getIncidents}
-          >
+          <input onChange={handleDoctorNameInput} />
+          <button type="button" className="App-button" onClick={getIncidents}>
             Submit
           </button>
           {queryResponse !== "" ? <p> {queryResponse}</p> : <p>&nbsp;</p>}
@@ -151,15 +153,18 @@ function App() {
         {/* Doctor registration (for ex: medical board licensure in new state) */}
         <p>
           <span>Doctor Registration: </span>
-          <input className="doctor-registration" onChange={handleDoctorRegistrationInput}/>
-          <button
-            type="button"
-            className="App-button"
-            onClick={invokeContract}
-          >
+          <input
+            className="doctor-registration"
+            onChange={handleDoctorRegistrationInput}
+          />
+          <button type="button" className="App-button" onClick={invokeContract}>
             Submit
           </button>
-          {registrationStatus !== "" ? <p> {registrationStatus}</p> : <p>&nbsp;</p>}
+          {registrationStatus !== "" ? (
+            <p> {registrationStatus}</p>
+          ) : (
+            <p>&nbsp;</p>
+          )}
         </p>
 
         {/* Error message display */}
