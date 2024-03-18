@@ -66,7 +66,7 @@ function App() {
       if (!res.ok) {
         setErrorMsg(resJSON.error);
       } else {
-        setQueryResponse(JSON.stringify([...incidents]));
+        setQueryResponse(JSON.stringify([...incidents].map((item) => JSON.parse(item))));
       }
     } catch (err: any) {
       setErrorMsg(err.stack);
