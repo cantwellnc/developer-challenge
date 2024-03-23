@@ -105,7 +105,7 @@ app.post("/api/register", async (req, res) => {
   // just run on one node for now, but a TODO would be to route to a different node depending on
   // location or something like that
   try {
-    const fireflyRes = await fireflies[0].invokeContractAPI(
+    const fireflyRes = await fireflies[0].queryContractAPI(
       apiName,
       "validate",
       {
